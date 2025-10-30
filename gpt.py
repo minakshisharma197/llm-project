@@ -174,21 +174,15 @@ class GPTLanguageModel(nn.Module):
         return logits, loss
 
     def generate(self, idx, max_new_tokens):
-        
-        for _ in range(max_new_tokens):
-            
-            idx_cond = idx[:, -block_size:]
-            
-            logits, loss = self(idx_cond)
-           
-            logits = logits[:, -1, :] 
-         
-            probs = F.softmax(logits, dim=-1) 
-          
-            idx_next = torch.multinomial(probs, num_samples=1) 
-           
-            idx = torch.cat((idx, idx_next), dim=1) 
-        return idx
+    for _ in range(max_new_tokens):
+        idx_cond = idx[:, -block_size:]          
+        with torch.no_grad():                    
+            logits, _ = self(idx_cond)
+            logits = logits[:, -1, :]            
+            probs = F.softmax(logits, dim=-1)
+            idx_next = torch.multinomial(probs, num_samples=1)
+            idx = torch.cat((idx, idx_next), dim=1)
+    return idx
 
 model = GPTLanguageModel()
 m = model.to(device)
