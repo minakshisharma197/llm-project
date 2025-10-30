@@ -156,7 +156,8 @@ class GPTLanguageModel(nn.Module):
 
        
         tok_emb = self.token_embedding_table(idx) 
-        pos_emb = self.position_embedding_table(torch.arange(T, device=device)) 
+        pos_idx = torch.arange(T, device=idx.device) 
+        pos_emb = self.position_embedding_table(pos_idx)
         x = tok_emb + pos_emb 
         x = self.blocks(x) 
         x = self.ln_f(x) 
