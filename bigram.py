@@ -73,20 +73,16 @@ class BigramLanguageModel(nn.Module):
             loss = F.cross_entropy(logits, targets)
 
         return logits, loss
-    def generate(self, idx, max_new_tokens):
-      
-        for _ in range(max_new_tokens):
-          
-            logits, loss = self(idx)
         
-            logits = logits[:, -1, :] 
-      
-            probs = F.softmax(logits, dim=-1) 
-
-            idx_next = torch.multinomial(probs, num_samples=1) 
-           
-            idx = torch.cat((idx, idx_next), dim=1) 
-        return idx
+    def generate(self, idx, max_new_tokens):
+    with torch.no_grad():  # ✅ Prevent gradient computation
+        for _ in range(max_new_tokens):
+            logits, _ = self(idx)
+            logits = logits[:, -1, :]
+            probs = F.softmax(logits, dim=-1)
+            idx_next = torch.multinomial(probs, num_samples=1)
+            idx = torch.cat((idx, idx_next), dim=1)
+    return idx
 
 model = BigramLanguageModel(vocab_size)
 m = model.to(device)
